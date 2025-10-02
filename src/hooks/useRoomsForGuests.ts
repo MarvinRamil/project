@@ -12,25 +12,38 @@ export const useRoomsForGuests = () => {
       setLoading(true);
       setError(null);
 
+      console.log('useRoomsForGuests: Fetching rooms...');
       const response = await roomsApi.getAllRoomsForGuests();
+      console.log('useRoomsForGuests: API response:', response);
+      
       if (response.success) {
+        console.log('useRoomsForGuests: Setting rooms:', response.data);
         setRooms(response.data);
       } else {
+        console.log('useRoomsForGuests: API error:', response.message);
         setError(response.message || 'Failed to fetch rooms');
       }
     } catch (err) {
+      console.error('useRoomsForGuests: Fetch error:', err);
       setError('Failed to fetch rooms');
-      console.error('Rooms fetch error:', err);
     } finally {
       setLoading(false);
     }
   };
 
   const filteredRooms = useMemo(() => {
-    return rooms.filter(room => {
-      // Only show available rooms for guests
-      return room.status === 'available';
+    console.log('useRoomsForGuests: Filtering rooms. Total rooms:', rooms.length);
+    console.log('useRoomsForGuests: Room statuses:', rooms.map(r => ({ id: r.id, status: r.status })));
+    
+    const available = rooms.filter(room => {
+      // Temporarily show all rooms for debugging
+      console.log('useRoomsForGuests: Checking room:', { id: room.id, status: room.status, statusType: typeof room.status });
+      return true; // Show all rooms temporarily
+      // return room.status === 'available';
     });
+    
+    console.log('useRoomsForGuests: Available rooms:', available.length);
+    return available;
   }, [rooms]);
 
   useEffect(() => {

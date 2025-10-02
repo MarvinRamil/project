@@ -94,7 +94,10 @@ export const roomsApi = {
   // Get all rooms (for guest access - no authentication required)
   getAllRoomsForGuests: async (): Promise<ApiResponse<Room[]>> => {
     try {
-      const response = await fetch(getApiUrl('Room'), {
+      const url = getApiUrl('Room');
+      console.log('getAllRoomsForGuests: Fetching from URL:', url);
+      
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -103,8 +106,11 @@ export const roomsApi = {
         credentials: 'omit'
       });
 
+      console.log('getAllRoomsForGuests: Response status:', response.status, response.statusText);
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.log('getAllRoomsForGuests: Error response:', errorData);
         return {
           data: [],
           success: false,
@@ -113,9 +119,11 @@ export const roomsApi = {
       }
 
       const apiResponse = await response.json();
+      console.log('getAllRoomsForGuests: Raw API response:', apiResponse);
       
       // Map API response to our format
       const rooms = apiResponse.data.map(mapApiRoomToRoom);
+      console.log('getAllRoomsForGuests: Mapped rooms:', rooms);
       
       return {
         data: rooms,
@@ -123,7 +131,7 @@ export const roomsApi = {
         message: 'Rooms fetched successfully'
       };
     } catch (error) {
-      console.error('Error fetching rooms for guests:', error);
+      console.error('getAllRoomsForGuests: Error fetching rooms for guests:', error);
       return {
         data: [],
         success: false,

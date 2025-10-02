@@ -7,14 +7,14 @@ const isDevelopment = import.meta.env.DEV;
 export const API_CONFIG = {
   // Development URLs
   development: {
-    apiBaseUrl: 'https://localhost:7118',
-    imageBaseUrl: 'https://localhost:7118'
+    apiBaseUrl: 'https://backend.mrcurading.xyz',
+    imageBaseUrl: 'https://backend.mrcurading.xyz'
   },
   
   // Production URLs (update these for your production environment)
   production: {
-    apiBaseUrl: 'https://your-production-api.com/api',
-    imageBaseUrl: 'https://your-production-api.com'
+    apiBaseUrl: 'https://backend.mrcurading.xyz/api',
+    imageBaseUrl: 'https://backend.mrcurading.xyzs'
   }
 };
 

@@ -14,7 +14,7 @@ export const API_CONFIG = {
   // Production URLs (update these for your production environment)
   production: {
     apiBaseUrl: 'https://backend.mrcurading.xyz',
-    imageBaseUrl: 'https://backend.mrcurading.xyzs'
+    imageBaseUrl: 'https://backend.mrcurading.xyz'
   }
 };
 

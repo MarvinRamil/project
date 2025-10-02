@@ -17,7 +17,7 @@ export interface Room {
   id: number;
   number: string;
   type: string;
-  status: number; // 0 = available, 1 = occupied, 2 = cleaning, etc.
+  status: RoomStatus; // 'available' | 'occupied' | 'cleaning' | 'maintenance' | 'out-of-order'
   price: number;
   capacity: number;
   amenities: string[];

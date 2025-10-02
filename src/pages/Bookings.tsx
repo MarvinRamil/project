@@ -3,6 +3,7 @@ import { Calendar, Plus, Search, Filter, User, CreditCard, Clock, MoreVertical, 
 import { useBookings, useRooms } from '../hooks';
 import { format } from 'date-fns';
 import { bookingsApi } from '../api/bookings';
+import { getApiUrl } from '../config/api';
 import OtpVerificationModal from '../components/booking/OtpVerificationModal';
 
 const Bookings = () => {
@@ -63,7 +64,7 @@ const Bookings = () => {
   // Fetch all rooms for walk-in modal
   const fetchAllRooms = async () => {
     try {
-      const response = await fetch('https://localhost:7118/api/Room');
+      const response = await fetch(getApiUrl('Room'));
       if (response.ok) {
         const data = await response.json();
         setAllRooms(data.data || []);
@@ -267,7 +268,7 @@ const Bookings = () => {
         specialRequests: walkInData.specialRequests || ''
       };
 
-      const response = await fetch('https://localhost:7118/api/Booking', {
+      const response = await fetch(getApiUrl('Booking'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

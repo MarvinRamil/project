@@ -95,7 +95,7 @@ export const useTokenRefresh = (): UseTokenRefreshReturn => {
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
       // If localStorage changes (like logout in another tab), check auth status
-      if (event.key === 'authToken' && !event.newValue) {
+      if (event.key === 'hotel_access_token' && !event.newValue) {
         checkAuthStatus();
       }
     };

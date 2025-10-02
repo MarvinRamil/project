@@ -21,7 +21,8 @@ const FORCE_REAL_API = true;
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const getAuthToken = (): string | null => {
-  return localStorage.getItem('authToken');
+  // Use the token manager to get the current access token
+  return tokenManager.getAccessToken();
 };
 
 export const decodeJWT = (token: string): JWTPayload | null => {

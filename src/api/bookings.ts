@@ -21,8 +21,9 @@ export const bookingsApi = {
   // Get all bookings
   getAllBookings: async (): Promise<ApiResponse<Booking[]>> => {
     try {
-      const token = getAuthToken();
       
+      const token = getAuthToken();
+      console.log(token);
       if (!token) {
         return {
           data: [],
@@ -30,7 +31,7 @@ export const bookingsApi = {
           message: 'Authentication token not found. Please log in again.'
         };
       }
-
+  console.log(getApiUrl('Booking'));
       const response = await fetch(getApiUrl('Booking'), {
         method: 'GET',
         headers: getAuthHeaders(),
@@ -178,9 +179,9 @@ export const bookingsApi = {
   },
 
   // Verify booking OTP
-  verifyBookingOtp: async (bookingId: number, otpCode: string): Promise<ApiResponse<any>> => {
+  verifyBookingOtp: async (bookingId: number, otpCode: string): Promise<ApiResponse<{ success: boolean; message: string; bookingId: number; bookingStatus: string; verifiedAt: string } | null>> => {
     try {
-      const response = await fetch('https://localhost:7118/api/BookingOtp/verify', {
+      const response = await fetch(getApiUrl('BookingOtp/verify'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

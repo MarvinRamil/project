@@ -10,7 +10,7 @@ interface BackendApiResponse<T> {
   timestamp: string;
 }
 
-const API_BASE_URL = 'https://localhost:7118/api';
+import { getApiUrl } from '../config/api';
 
 // Helper function to create authenticated headers
 const getAuthHeaders = () => {
@@ -41,7 +41,7 @@ export const guestsApi = {
         };
       }
 
-      const response = await fetch(`${API_BASE_URL}/Guest`, {
+      const response = await fetch(getApiUrl('Guest'), {
         method: 'GET',
         headers: getAuthHeaders(),
       });
@@ -81,7 +81,7 @@ export const guestsApi = {
         };
       }
 
-      const response = await fetch(`${API_BASE_URL}/Guest/${id}`, {
+      const response = await fetch(getApiUrl(`Guest/${id}`), {
         method: 'GET',
         headers: getAuthHeaders(),
       });
@@ -127,7 +127,7 @@ export const guestsApi = {
         };
       }
 
-      const response = await fetch(`${API_BASE_URL}/Guest`, {
+      const response = await fetch(getApiUrl('Guest'), {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(guestData),
@@ -167,7 +167,7 @@ export const guestsApi = {
         };
       }
 
-      const response = await fetch(`${API_BASE_URL}/Guest/${guestId}`, {
+      const response = await fetch(getApiUrl(`Guest/${guestId}`), {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(updates),
@@ -214,7 +214,7 @@ export const guestsApi = {
         };
       }
 
-      const response = await fetch(`${API_BASE_URL}/Guest/${guestId}`, {
+      const response = await fetch(getApiUrl(`Guest/${guestId}`), {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
@@ -260,7 +260,7 @@ export const guestsApi = {
         };
       }
 
-      const response = await fetch(`${API_BASE_URL}/Guest/search?q=${encodeURIComponent(query)}`, {
+      const response = await fetch(getApiUrl(`Guest/search?q=${encodeURIComponent(query)}`), {
         method: 'GET',
         headers: getAuthHeaders(),
       });

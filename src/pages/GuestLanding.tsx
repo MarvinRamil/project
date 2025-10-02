@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Wifi, Car, Utensils, Waves, Phone, Mail, Calendar, Users, Camera } from 'lucide-react';
-import { useRooms } from '../hooks';
+import { useRoomsForGuests } from '../hooks';
 import { getImageUrl } from '../config/api';
 
 const GuestLanding = () => {
-  const { rooms, loading, error } = useRooms();
+  const { rooms, loading, error } = useRoomsForGuests();
   const [displayRooms, setDisplayRooms] = useState<Array<{
     id: string;
     name: string;

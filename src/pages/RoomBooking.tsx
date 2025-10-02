@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Calendar, ArrowLeft, Camera, X, Filter, Bed, Users } from 'lucide-react';
-import { useRooms } from '../hooks';
-import { getImageUrl } from '../config/api';
+import { useRoomsForGuests } from '../hooks';
+import { getImageUrl, getApiUrl } from '../config/api';
 import { bookingsApi } from '../api/bookings';
 import OtpVerificationModal from '../components/booking/OtpVerificationModal';
 
 const RoomBooking = () => {
   const navigate = useNavigate();
-  const { rooms: dbRooms, loading, error } = useRooms();
+  const { rooms: dbRooms, loading, error } = useRoomsForGuests();
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [roomBookings, setRoomBookings] = useState<Array<{
@@ -110,7 +110,7 @@ const RoomBooking = () => {
   const fetchRoomBookings = async (roomId: string) => {
     setLoadingBookings(true);
     try {
-      const response = await fetch(`https://localhost:7118/api/Booking/room/${roomId}`);
+      const response = await fetch(getApiUrl(`Booking/room/${roomId}`));
       if (response.ok) {
         const data = await response.json();
         const today = new Date();
@@ -137,7 +137,7 @@ const RoomBooking = () => {
   const fetchRoomMaintenance = async (roomId: string) => {
     setLoadingMaintenance(true);
     try {
-      const response = await fetch(`https://localhost:7118/api/MaintenanceDate/room/${roomId}`);
+      const response = await fetch(getApiUrl(`MaintenanceDate/room/${roomId}`));
       if (response.ok) {
         const data = await response.json();
         const today = new Date();
@@ -192,7 +192,7 @@ const RoomBooking = () => {
         specialRequests: bookingData.specialRequests || ''
       };
 
-      const response = await fetch('https://localhost:7118/api/Booking', {
+      const response = await fetch(getApiUrl('Booking'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

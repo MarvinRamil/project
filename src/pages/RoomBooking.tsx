@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Calendar, ArrowLeft, Camera, X, Filter, Bed, Users } from 'lucide-react';
+import { Calendar, ArrowLeft, Camera, X, Filter, Bed, Users, Search, MapPin, Phone, Mail, Wifi, Car, Utensils, Waves } from 'lucide-react';
 import { useRoomsForGuests } from '../hooks';
+import { useAuth } from '../hooks/useAuth';
 import { getImageUrl, getApiUrl } from '../config/api';
 import { bookingsApi } from '../api/bookings';
+import { guestsApi } from '../api/guests';
 import OtpVerificationModal from '../components/booking/OtpVerificationModal';
 
 const RoomBooking = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { rooms: dbRooms, loading, error } = useRoomsForGuests();
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -34,6 +37,11 @@ const RoomBooking = () => {
     phone: '',
     specialRequests: ''
   });
+
+  // Debug: Log booking data changes
+  useEffect(() => {
+    console.log('Booking data updated:', bookingData);
+  }, [bookingData]);
   
   // OTP Verification state
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -42,6 +50,68 @@ const RoomBooking = () => {
     bookingNumber?: string;
     guestEmail?: string;
   } | null>(null);
+
+  // Function to fetch guest information
+  const fetchGuestInfo = useCallback(async () => {
+    if (user?.email) {
+      console.log('=== FETCHING GUEST INFO ===');
+      console.log('User email:', user.email);
+      console.log('User object:', user);
+      try {
+        console.log('Calling guestsApi.getGuestByEmail...');
+        const guestResponse = await guestsApi.getGuestByEmail(user.email);
+        console.log('=== GUEST API RESPONSE ===');
+        console.log('Full response:', guestResponse);
+        console.log('Success:', guestResponse.success);
+        console.log('Message:', guestResponse.message);
+        console.log('Data:', guestResponse.data);
+        
+        if (guestResponse.success && guestResponse.data) {
+          const guest = guestResponse.data;
+          console.log('=== GUEST DATA ===');
+          console.log('Guest object:', guest);
+          console.log('firstName:', guest.firstName);
+          console.log('lastName:', guest.lastName);
+          console.log('email:', guest.email);
+          console.log('phone:', guest.phone);
+          
+          const updatedData = {
+            firstName: guest.firstName || '',
+            lastName: guest.lastName || '',
+            email: guest.email || '',
+            phone: guest.phone || ''
+          };
+          console.log('=== UPDATING BOOKING DATA ===');
+          console.log('Updated data:', updatedData);
+          
+          setBookingData(prev => {
+            console.log('Current booking data before update:', prev);
+            const newData = { ...prev, ...updatedData };
+            console.log('New booking data after update:', newData);
+            return newData;
+          });
+        } else {
+          console.log('=== FAILED TO FETCH GUEST DATA ===');
+          console.log('Success:', guestResponse.success);
+          console.log('Message:', guestResponse.message);
+          console.log('Data:', guestResponse.data);
+        }
+      } catch (error) {
+        console.error('=== ERROR FETCHING GUEST INFORMATION ===');
+        console.error('Error:', error);
+      } finally {
+        console.log('=== FETCH COMPLETE ===');
+      }
+    } else {
+      console.log('=== NO USER EMAIL FOUND ===');
+      console.log('User object:', user);
+    }
+  }, [user]);
+
+  // Auto-fill guest information when user is logged in
+  useEffect(() => {
+    fetchGuestInfo();
+  }, [user?.email, fetchGuestInfo]);
 
   // Transform database rooms to match the expected format
   const rooms = dbRooms?.map(room => ({
@@ -61,6 +131,7 @@ const RoomBooking = () => {
   // Calculate dynamic price range from room data
   const maxPrice = rooms.length > 0 ? Math.max(...rooms.map(room => room.price)) : 1000;
 
+  const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     priceRange: [0, maxPrice],
     roomType: 'all',
@@ -72,13 +143,19 @@ const RoomBooking = () => {
   const allRoomTypes = Array.from(new Set(rooms.map(room => room.type)));
   
   const filteredRooms = rooms.filter(room => {
+    const matchesSearch = searchQuery === '' || 
+      room.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      room.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      room.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      room.amenities.some(amenity => amenity.toLowerCase().includes(searchQuery.toLowerCase()));
+    
     const matchesPrice = room.price >= filters.priceRange[0] && room.price <= filters.priceRange[1];
     const matchesType = filters.roomType === 'all' || room.type.toLowerCase().includes(filters.roomType.toLowerCase());
     const matchesCapacity = filters.capacity === 'all' || room.capacity >= parseInt(filters.capacity);
     const matchesAmenities = filters.amenities.length === 0 || 
       filters.amenities.every(amenity => room.amenities.includes(amenity));
     
-    return matchesPrice && matchesType && matchesCapacity && matchesAmenities;
+    return matchesSearch && matchesPrice && matchesType && matchesCapacity && matchesAmenities;
   });
 
   const handleFilterChange = (filterType: string, value: string | number | string[] | number[]) => {
@@ -95,6 +172,7 @@ const RoomBooking = () => {
   };
 
   const clearFilters = () => {
+    setSearchQuery('');
     setFilters({
       priceRange: [0, maxPrice],
       roomType: 'all',
@@ -332,10 +410,31 @@ const RoomBooking = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Find Your Perfect Room</h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Browse our selection of comfortable accommodations and book your ideal stay
+          <div className="flex items-center justify-center mb-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center">
+              <Bed className="w-8 h-8 text-white" />
+            </div>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Find Your Perfect Room
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+            Discover luxury accommodations tailored to your needs. Search, filter, and book your ideal stay with ease.
           </p>
+          
+          {/* Quick Search Bar */}
+          <div className="max-w-2xl mx-auto">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by room name, type, amenities, or features..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg shadow-sm"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -562,6 +661,11 @@ const RoomBooking = () => {
                           fetchRoomBookings(room.id);
                           fetchRoomMaintenance(room.id);
                           setShowBookingModal(true);
+                          
+                          // Auto-fill guest information when booking modal opens
+                          if (user?.email) {
+                            fetchGuestInfo();
+                          }
                         }}
                         className="w-full py-3 px-6 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md"
                       >
@@ -669,6 +773,86 @@ const RoomBooking = () => {
           </div>
         </div>
       </div>
+
+      {/* Hotel Amenities Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Hotel Amenities</h2>
+            <p className="text-lg text-gray-600">World-class facilities for your comfort and convenience</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center group">
+              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                <Wifi className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Free WiFi</h3>
+              <p className="text-gray-600">High-speed internet throughout the hotel</p>
+            </div>
+            
+            <div className="text-center group">
+              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                <Car className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Free Parking</h3>
+              <p className="text-gray-600">Complimentary valet parking service</p>
+            </div>
+            
+            <div className="text-center group">
+              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                <Utensils className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Fine Dining</h3>
+              <p className="text-gray-600">Award-winning restaurant and bar</p>
+            </div>
+            
+            <div className="text-center group">
+              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                <Waves className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Spa & Pool</h3>
+              <p className="text-gray-600">Luxury spa and outdoor swimming pool</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Information */}
+      <section className="py-16 bg-gray-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Need Help?</h2>
+            <p className="text-xl text-gray-300">Our team is here to assist you with any questions</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Phone className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Call Us</h3>
+              <p className="text-gray-300">+1 (555) 123-4567</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Mail className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Email Us</h3>
+              <p className="text-gray-300">reservations@curadingshotel.com</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <MapPin className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Visit Us</h3>
+              <p className="text-gray-300">123 Luxury Avenue, Downtown City</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Booking Modal */}
       {showBookingModal && selectedRoom && (
@@ -890,7 +1074,8 @@ const RoomBooking = () => {
                           required
                           value={bookingData.firstName}
                           onChange={(e) => handleInputChange('firstName', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Enter first name"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       </div>
                       <div>
@@ -900,7 +1085,8 @@ const RoomBooking = () => {
                           required
                           value={bookingData.lastName}
                           onChange={(e) => handleInputChange('lastName', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Enter last name"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       </div>
                     </div>
@@ -912,7 +1098,8 @@ const RoomBooking = () => {
                         required
                         value={bookingData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter email address"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                     

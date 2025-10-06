@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {  Mail, Lock, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -8,6 +9,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { login, isLoading } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,15 +21,31 @@ const Login = () => {
       console.log('Login result in component:', result);
       
       if (result.success) {
-        console.log('Login successful, redirecting...');
-        // Login successful, redirect to admin dashboard
-        window.location.href = '/admin/dashboard';
+        console.log('Login successful, redirecting based on user role...');
+        console.log('User role:', result.user?.role);
+        console.log('User object:', result.user);
+        // Redirect based on user role
+        if (result.user?.role === 'guest') {
+          console.log('Redirecting guest to /guest/menu');
+          navigate('/guest/menu', { replace: true });
+          // Fallback redirect in case navigate doesn't work
+          setTimeout(() => {
+            window.location.href = '/guest/menu';
+          }, 1000);
+        } else {
+          console.log('Redirecting non-guest to /landing');
+          navigate('/landing', { replace: true });
+          // Fallback redirect in case navigate doesn't work
+          setTimeout(() => {
+            window.location.href = '/landing';
+          }, 1000);
+        }
       } else {
         console.log('Login failed:', result.error);
-        setError(result.error || 'Invalid email or password');
+        setError(result.error || 'Invalid username or password');
       }
     } catch (err) {
-      setError('Invalid email or password');
+      setError('Invalid username or password');
     }
   };
 
@@ -43,7 +61,7 @@ const Login = () => {
           Curading's Hotel Management
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Sign in to your hotel management dashboard
+          Sign in to your account
         </p>
       </div>
 
@@ -120,10 +138,16 @@ const Login = () => {
           </form>
 
           <div className="mt-6">
-            <div className="bg-gray-50 rounded-md p-4">
-              <h4 className="text-sm font-medium text-gray-900 mb-2">Demo Credentials:</h4>
-              <p className="text-xs text-gray-600">Username: manager@curadingshotel.com</p>
-              <p className="text-xs text-gray-600">Password: any password</p>
+            <div className="text-center">
+              <p className="text-sm text-gray-600">
+                Don't have an account?{' '}
+                <button
+                  onClick={() => navigate('/register')}
+                  className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:underline"
+                >
+                  Create one here
+                </button>
+              </p>
             </div>
           </div>
         </div>

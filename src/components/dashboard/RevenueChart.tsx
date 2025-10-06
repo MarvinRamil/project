@@ -1,34 +1,37 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { RevenueData } from '../../api/types';
 
-const data = [
-  { name: 'Jan', revenue: 12000 },
-  { name: 'Feb', revenue: 15000 },
-  { name: 'Mar', revenue: 18000 },
-  { name: 'Apr', revenue: 22000 },
-  { name: 'May', revenue: 19000 },
-  { name: 'Jun', revenue: 24000 },
-  { name: 'Jul', revenue: 28000 },
-  { name: 'Aug', revenue: 26000 },
-  { name: 'Sep', revenue: 23000 },
-  { name: 'Oct', revenue: 25000 },
-  { name: 'Nov', revenue: 27000 },
-  { name: 'Dec', revenue: 30000 },
-];
+interface RevenueChartProps {
+  data?: RevenueData[];
+}
 
-const RevenueChart = () => {
+const RevenueChart: React.FC<RevenueChartProps> = ({ data = [] }) => {
+  // Transform the data to match the chart format
+  const chartData = data.map(item => ({
+    name: item.month,
+    revenue: item.revenue,
+    bookings: item.bookings,
+    occupancy: item.occupancy
+  }));
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <h2 className="text-lg font-semibold text-gray-900 mb-6">Revenue Trend</h2>
       
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
+          <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
             <Tooltip 
-              formatter={(value) => [`$${value.toLocaleString()}`, 'Revenue']}
+              formatter={(value, name) => {
+                if (name === 'revenue') return [`$${Number(value).toLocaleString()}`, 'Revenue'];
+                if (name === 'bookings') return [value, 'Bookings'];
+                if (name === 'occupancy') return [`${value}%`, 'Occupancy'];
+                return [value, name];
+              }}
               labelStyle={{ color: '#374151' }}
             />
             <Line 

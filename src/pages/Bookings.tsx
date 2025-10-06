@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Plus, Search, Filter, User, CreditCard, Clock, MoreVertical, CheckCircle, XCircle, AlertCircle, UserPlus, X, Check } from 'lucide-react';
 import { useBookings, useRooms } from '../hooks';
+import { roomsApi } from '../api';
 import { format } from 'date-fns';
 import { bookingsApi } from '../api/bookings';
 import { getApiUrl } from '../config/api';
@@ -64,13 +65,18 @@ const Bookings = () => {
   // Fetch all rooms for walk-in modal
   const fetchAllRooms = async () => {
     try {
-      const response = await fetch(getApiUrl('Room'));
-      if (response.ok) {
-        const data = await response.json();
-        setAllRooms(data.data || []);
+      console.log('fetchAllRooms: Fetching rooms for walk-in modal...');
+      const response = await roomsApi.getAllRooms();
+      console.log('fetchAllRooms: API response:', response);
+      
+      if (response.success) {
+        console.log('fetchAllRooms: Rooms data:', response.data);
+        setAllRooms(response.data || []);
+      } else {
+        console.error('fetchAllRooms: Failed to fetch rooms:', response.message);
       }
     } catch (error) {
-      console.error('Error fetching rooms:', error);
+      console.error('fetchAllRooms: Error fetching rooms:', error);
     }
   };
 
@@ -699,11 +705,17 @@ const Bookings = () => {
                       >
                         <option value="">Select a room</option>
                         {allRooms && allRooms.length > 0 ? (
-                          allRooms.filter(room => room.status === 0).map((room) => (
-                            <option key={room.id} value={room.id}>
-                              Room {room.number} - {room.type} (${room.price}/night)
-                            </option>
-                          ))
+                          (() => {
+                            console.log('Walk-in modal: All rooms:', allRooms);
+                            console.log('Walk-in modal: Room statuses:', allRooms.map(r => ({ id: r.id, status: r.status, statusType: typeof r.status })));
+                            const availableRooms = allRooms.filter(room => room.status === 'available');
+                            console.log('Walk-in modal: Available rooms (status === "available"):', availableRooms.length);
+                            return availableRooms.map((room) => (
+                              <option key={room.id} value={room.id}>
+                                Room {room.number} - {room.type} (${room.price}/night)
+                              </option>
+                            ));
+                          })()
                         ) : (
                           <option value="" disabled>Loading rooms...</option>
                         )}

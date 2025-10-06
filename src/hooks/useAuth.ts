@@ -39,11 +39,21 @@ export const useAuth = () => {
 
   const logout = async () => {
     try {
-      await authApi.logout();
+      console.log('=== USEAUTH: LOGOUT START ===');
+      console.log('Current user before logout:', user);
+      
+      const result = await authApi.logout();
+      console.log('Auth API logout result:', result);
+      
       setUser(null);
-      return { success: true };
+      console.log('User set to null');
+      
+      const finalResult = { success: true };
+      console.log('=== USEAUTH: LOGOUT SUCCESS ===', finalResult);
+      return finalResult;
     } catch (err) {
-      console.error('Logout error:', err);
+      console.error('=== USEAUTH: LOGOUT ERROR ===', err);
+      setUser(null); // Still clear user even if logout fails
       return { success: false, error: 'Logout failed' };
     }
   };
@@ -87,11 +97,15 @@ export const useAuth = () => {
 
   const checkAuthStatus = async () => {
     try {
+      console.log('=== CHECK AUTH STATUS ===');
       setIsLoading(true);
       const response = await authApi.getCurrentUser();
+      console.log('getCurrentUser response:', response);
       if (response.success && response.data) {
+        console.log('Setting user from checkAuthStatus:', response.data);
         setUser(response.data);
       } else {
+        console.log('No user data, setting user to null');
         setUser(null);
       }
     } catch (err) {
@@ -99,6 +113,7 @@ export const useAuth = () => {
       setUser(null);
     } finally {
       setIsLoading(false);
+      console.log('Auth check completed');
     }
   };
 

@@ -42,10 +42,24 @@ class HttpClient {
       }
     }
 
-    // Add credentials for cookie-based refresh tokens
-    fetchOptions.credentials = 'include';
+    // Add credentials for cookie-based refresh tokens only when not skipping auth
+    if (!skipAuth) {
+      fetchOptions.credentials = 'include';
+    }
+    
+    // Ensure headers object exists
+    if (!fetchOptions.headers) {
+      fetchOptions.headers = {};
+    }
 
     const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint}`;
+    
+    console.log('HTTP Client - Making request:', {
+      url,
+      skipAuth,
+      hasAuthHeader: !!(fetchOptions.headers as any)?.Authorization,
+      method: fetchOptions.method || 'GET'
+    });
     
     try {
       const response = await fetch(url, fetchOptions);

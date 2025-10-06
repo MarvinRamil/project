@@ -1,55 +1,7 @@
 import React from 'react';
 import { Calendar, User } from 'lucide-react';
 import { format } from 'date-fns';
-
-interface Room {
-  id: number;
-  number: string;
-  type: string;
-  status: number;
-  price: number;
-  capacity: number;
-  amenities: string[];
-  floor: number;
-  description?: string;
-  images?: string[];
-  lastCleaned?: string | null;
-  currentGuest?: string | null;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-interface Guest {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  idNumber?: string | null;
-  nationality?: string | null;
-  address?: string | null;
-  preferences: string[];
-  totalStays: number;
-  totalSpent: number;
-  joinDate: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Booking {
-  id: number;
-  bookingNumber: string;
-  room: Room;
-  guest: Guest;
-  checkIn: string;
-  checkOut: string;
-  status: number; // 0 = confirmed, 1 = checked-in, 2 = checked-out, etc.
-  totalAmount: number;
-  createdAt: string;
-  specialRequests?: string;
-  guests?: number;
-}
+import { Booking } from '../../api/types';
 
 interface RecentBookingsProps {
   bookings: Booking[];
@@ -78,6 +30,14 @@ const getStatusColor = (status: number) => {
 };
 
 const RecentBookings: React.FC<RecentBookingsProps> = ({ bookings }) => {
+  if (!bookings || bookings.length === 0) {
+    return (
+      <div className="px-6 py-8 text-center text-gray-500">
+        <p>No recent bookings found</p>
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
@@ -107,7 +67,10 @@ const RecentBookings: React.FC<RecentBookingsProps> = ({ bookings }) => {
                 #{booking.bookingNumber}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                Room {booking.room.number}
+                Room {booking.roomNumber || booking.room?.number || 'N/A'}
+                {booking.roomType && (
+                  <div className="text-xs text-gray-500">{booking.roomType}</div>
+                )}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 <div className="flex items-center">
@@ -121,7 +84,7 @@ const RecentBookings: React.FC<RecentBookingsProps> = ({ bookings }) => {
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                ${booking.totalAmount}
+                ${booking.totalAmount.toLocaleString()}
               </td>
             </tr>
           ))}

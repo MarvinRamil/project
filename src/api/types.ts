@@ -17,7 +17,7 @@ export interface Room {
   id: number;
   number: string;
   type: string;
-  status: RoomStatus; // 'available' | 'occupied' | 'cleaning' | 'maintenance' | 'out-of-order'
+  status: RoomStatus | number; // 'available' | 'occupied' | 'cleaning' | 'maintenance' | 'out-of-order' or numeric status
   price: number;
   capacity: number;
   amenities: string[];
@@ -63,8 +63,10 @@ export interface Guest {
 export interface Booking {
   id: number;
   bookingNumber: string;
-  room: Room;
-  guest: Guest;
+  room?: Room;
+  roomNumber?: string;
+  roomType?: string;
+  guest?: Guest;
   checkIn: string;
   checkOut: string;
   status: BookingStatus;
@@ -111,11 +113,48 @@ export interface HotelStats {
   occupancyRate: number;
 }
 
+export interface RevenueData {
+  month: string;
+  revenue: number;
+  bookings: number;
+  occupancy: number;
+}
+
+export interface RoomStatusOverview {
+  status: string;
+  count: number;
+  color: string;
+}
+
+export interface QuickAction {
+  title: string;
+  value: string;
+  description: string;
+  icon: string;
+  color: string;
+}
+
+export interface DashboardData {
+  stats: HotelStats;
+  revenueData: RevenueData[];
+  roomStatusOverview: RoomStatusOverview[];
+  recentBookings: Booking[];
+  quickActions: QuickAction[];
+}
+
+export interface ApiDashboardResponse {
+  success: boolean;
+  message: string;
+  data: DashboardData;
+  statusCode: number;
+  timestamp: string;
+}
+
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'manager' | 'receptionist' | 'housekeeping';
+  role: 'admin' | 'manager' | 'receptionist' | 'housekeeping' | 'guest';
   avatar?: string;
 }
 

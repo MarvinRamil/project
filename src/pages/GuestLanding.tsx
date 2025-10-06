@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { MapPin, Wifi, Car, Utensils, Waves, Phone, Mail, Calendar, Users, Camera } from 'lucide-react';
+import { MapPin, Wifi, Car, Utensils, Waves, Phone, Mail, Users, Camera, Menu, X, LogIn } from 'lucide-react';
 import { useRoomsForGuests } from '../hooks';
 import { getImageUrl } from '../config/api';
+import { useNavigate } from 'react-router-dom';
 
 const GuestLanding = () => {
   const { rooms, loading, error } = useRoomsForGuests();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
   const [displayRooms, setDisplayRooms] = useState<Array<{
     id: string;
     name: string;
@@ -51,33 +53,145 @@ const GuestLanding = () => {
     }
   }, [rooms]);
 
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (isMobileMenuOpen && !target.closest('nav')) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMobileMenuOpen]);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
       <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">C</span>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-16 gap-2">
+            {/* Logo */}
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-bold text-sm sm:text-lg">C</span>
               </div>
-              <div>
-                <h1 className="font-bold text-xl text-gray-900">Curading's Hotel</h1>
-                <p className="text-xs text-gray-600">Luxury & Comfort</p>
+              <div className="min-w-0 flex-1">
+                <h1 className="font-bold text-sm sm:text-lg lg:text-xl text-gray-900 truncate">
+                  <span className="hidden min-[400px]:inline">Curading's Hotel</span>
+                  <span className="min-[400px]:hidden">Curading's</span>
+                </h1>
+                <p className="text-xs text-gray-600 hidden sm:block">Luxury & Comfort</p>
               </div>
             </div>
-            <div className="flex items-center space-x-6">
-              <a href="#rooms" className="text-gray-700 hover:text-blue-600 font-medium">Rooms</a>
-              <a href="#amenities" className="text-gray-700 hover:text-blue-600 font-medium">Amenities</a>
-              <a href="#contact" className="text-gray-700 hover:text-blue-600 font-medium">Contact</a>
-              <Link
-                to="/rooms"
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-6">
+              <a 
+                href="#rooms" 
+                className="text-gray-700 hover:text-blue-600 font-medium transition-colors cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('rooms')?.scrollIntoView({ behavior: 'smooth' });
+                }}
               >
-                Book Now
-              </Link>
+                Rooms
+              </a>
+              <a 
+                href="#amenities" 
+                className="text-gray-700 hover:text-blue-600 font-medium transition-colors cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('amenities')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                Amenities
+              </a>
+              <a 
+                href="#contact" 
+                className="text-gray-700 hover:text-blue-600 font-medium transition-colors cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                Contact
+              </a>
+              <button
+                onClick={() => navigate('/login')}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center space-x-2"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Sign In to Book</span>
+              </button>
             </div>
+
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors flex-shrink-0 ml-2"
+              aria-label="Toggle mobile menu"
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
+            </button>
           </div>
+
+          {/* Mobile Navigation Menu */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden border-t border-gray-200 bg-white">
+              <div className="px-2 pt-2 pb-3 space-y-1">
+                <a
+                  href="#rooms"
+                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('rooms')?.scrollIntoView({ behavior: 'smooth' });
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  Rooms
+                </a>
+                <a
+                  href="#amenities"
+                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('amenities')?.scrollIntoView({ behavior: 'smooth' });
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  Amenities
+                </a>
+                <a
+                  href="#contact"
+                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  Contact
+                </a>
+                <button
+                  onClick={() => {
+                    navigate('/login');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="block w-full px-3 py-2 text-base font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors mx-3 mt-2 text-center"
+                >
+                  <LogIn className="inline w-4 h-4 mr-2" />
+                  Sign In to Book
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 
@@ -104,13 +218,13 @@ const GuestLanding = () => {
             Where every moment becomes a cherished memory.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/rooms"
+            <button
+              onClick={() => navigate('/login')}
               className="bg-blue-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
             >
-              <Calendar className="inline-block w-5 h-5 mr-2" />
-              Book Your Stay
-            </Link>
+              <LogIn className="inline-block w-5 h-5 mr-2" />
+              Sign In to Book
+            </button>
             <a
               href="#rooms"
               className="border-2 border-white text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-white hover:text-gray-900 transition-all duration-200"
@@ -230,12 +344,12 @@ const GuestLanding = () => {
                       )}
                     </div>
 
-                    <Link
-                      to="/rooms"
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium text-center block"
+                    <button
+                      onClick={() => navigate('/login')}
+                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium text-center"
                     >
-                      Book This Room
-                    </Link>
+                      Sign In to Book
+                    </button>
                   </div>
                 </div>
               ))}
@@ -331,13 +445,13 @@ const GuestLanding = () => {
                     <option>4 Guests</option>
                   </select>
                 </div>
-                <Link
-                  to="/rooms"
-                  className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium text-center block"
+                <button
+                  onClick={() => navigate('/login')}
+                  className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium text-center"
                 >
-                  <Users className="inline-block w-5 h-5 mr-2" />
-                  Check Availability
-                </Link>
+                  <LogIn className="inline-block w-5 h-5 mr-2" />
+                  Sign In to Book
+                </button>
               </div>
             </div>
           </div>
@@ -368,6 +482,7 @@ const GuestLanding = () => {
           </div>
         </div>
       </footer>
+
     </div>
   );
 };

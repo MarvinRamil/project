@@ -48,10 +48,10 @@ const NotFound = () => {
             <Link to="/" className="text-blue-600 hover:text-blue-800 hover:underline">
               Homepage
             </Link>
-            <Link to="/rooms" className="text-blue-600 hover:text-blue-800 hover:underline">
+            <Link to="/guest/rooms" className="text-blue-600 hover:text-blue-800 hover:underline">
               Room Booking
             </Link>
-            <Link to="/booking-confirmation" className="text-blue-600 hover:text-blue-800 hover:underline">
+            <Link to="/guest/booking-confirmation" className="text-blue-600 hover:text-blue-800 hover:underline">
               Booking Confirmation
             </Link>
             <Link to="/admin/dashboard" className="text-blue-600 hover:text-blue-800 hover:underline">

@@ -56,6 +56,10 @@ class SecureTokenManager {
    * @returns Access token or null if expired/missing
    */
   getAccessToken(): string | null {
+    console.log('=== TOKEN MANAGER - GET ACCESS TOKEN ===');
+    console.log('Memory token exists:', !!this.accessToken);
+    console.log('Token expired:', this.isTokenExpired());
+    
     // First try to get from memory
     if (this.accessToken && !this.isTokenExpired()) {
       console.log('TokenManager - Getting access token from memory, exists:', true, 'expired:', false);
@@ -63,13 +67,22 @@ class SecureTokenManager {
     }
     
     // If not in memory or expired, try to load from localStorage
+    console.log('Checking localStorage for stored token...');
     try {
       const storedToken = localStorage.getItem(this.ACCESS_TOKEN_KEY);
       const storedExpiry = localStorage.getItem(this.TOKEN_EXPIRY_KEY);
       
+      console.log('Stored token exists:', !!storedToken);
+      console.log('Stored expiry exists:', !!storedExpiry);
+      
       if (storedToken && storedExpiry) {
         const expiryTime = parseInt(storedExpiry, 10);
-        if (Date.now() < expiryTime) {
+        const now = Date.now();
+        console.log('Current time:', now);
+        console.log('Token expiry time:', expiryTime);
+        console.log('Token still valid:', now < expiryTime);
+        
+        if (now < expiryTime) {
           // Token is still valid, load it into memory
           this.accessToken = storedToken;
           this.tokenExpiry = expiryTime;
@@ -80,12 +93,15 @@ class SecureTokenManager {
           this.clearStoredToken();
           console.log('TokenManager - Stored token expired, cleared from localStorage');
         }
+      } else {
+        console.log('No stored token or expiry found in localStorage');
       }
     } catch (error) {
       console.warn('TokenManager - Failed to read token from localStorage:', error);
     }
     
     console.log('TokenManager - Getting access token, exists:', !!this.accessToken, 'expired:', this.isTokenExpired());
+    console.log('Returning null - no valid token found');
     return null;
   }
 

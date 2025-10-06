@@ -9,3 +9,4 @@ export { useStaff } from './useStaff';
 export { useReports } from './useReports';
 export { useAuth } from './useAuth';
 export { useTokenRefresh } from './useTokenRefresh';
+export { useGuestInfo } from './useGuestInfo';

@@ -1,16 +1,27 @@
 import React, { useState } from 'react';
-import { Bell, User, LogOut } from 'lucide-react';
+import { Bell, User, LogOut, Menu } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSidebar } from '../../contexts/SidebarContext';
 
 const Header = () => {
   const { user, logout } = useAuth();
+  const { toggleSidebar } = useSidebar();
   const [showProfile, setShowProfile] = useState(false);
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-end">
+    <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
+      <div className="flex items-center justify-between">
+        {/* Mobile menu button */}
+        <button
+          onClick={toggleSidebar}
+          className="lg:hidden p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+          aria-label="Toggle sidebar"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
         {/* Right section */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 lg:space-x-4">
           {/* Notifications */}
           <button className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg">
             <Bell className="w-5 h-5" />

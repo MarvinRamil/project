@@ -110,17 +110,34 @@ export const bookingsApi = {
         };
       }
 
-      const response = await fetch(getApiUrl(`Booking/guest/${guestId}`), {
+      const url = getApiUrl(`Booking/guest/${guestId}`);
+      console.log('=== FETCHING GUEST BOOKINGS ===');
+      console.log('Guest ID:', guestId);
+      console.log('API URL:', url);
+      console.log('Headers:', getAuthHeaders());
+      
+      const response = await fetch(url, {
         method: 'GET',
         headers: getAuthHeaders(),
       });
       
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+      
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.log('Error response data:', errorData);
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
       
       const result = await response.json();
+      console.log('=== GUEST BOOKINGS API RESPONSE ===');
+      console.log('Full response:', result);
+      console.log('Success:', result.success);
+      console.log('Message:', result.message);
+      console.log('Data length:', result.data?.length || 0);
+      console.log('Data structure:', result.data);
+      
       return {
         data: result.data || result || [],
         success: result.success !== false,

@@ -70,37 +70,6 @@ const Dashboard = () => {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-gray-600">Welcome back! Here's what's happening at your hotel today.</p>
-        {stats && stats.occupancyRate === 50 && stats.totalRooms === 2 ? (
-          <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-sm text-yellow-800">
-              <strong>Note:</strong> Currently displaying fallback data. The API connection may be unavailable or require authentication.
-            </p>
-            <button 
-              onClick={() => {
-                console.log('Testing stats API...');
-                fetch('https://backend.mrcurading.xyz/api/Dashboard/stats')
-                  .then(response => response.json())
-                  .then(data => {
-                    console.log('Stats API Response:', data);
-                    alert('Check console for API response');
-                  })
-                  .catch(error => {
-                    console.error('Stats API Error:', error);
-                    alert('API Error - Check console for details');
-                  });
-              }}
-              className="mt-2 px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
-            >
-              Test Stats API
-            </button>
-          </div>
-        ) : stats && (
-          <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
-            <p className="text-sm text-green-800">
-              <strong>Success:</strong> Data loaded from API endpoint: /api/Dashboard/stats
-            </p>
-          </div>
-        )}
       </div>
 
       {/* Stats grid */}
